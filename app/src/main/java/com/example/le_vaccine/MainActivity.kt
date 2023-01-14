@@ -1,17 +1,32 @@
 package com.example.le_vaccine
 
+import android.app.Activity
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.location.LocationRequest
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.webkit.GeolocationPermissions
 import android.webkit.WebChromeClient
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsResponse
+import com.google.android.gms.location.SettingsClient
+import com.google.android.gms.tasks.Task
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.jar.Manifest
 
 
 class MainActivity : AppCompatActivity() {
@@ -21,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         supportActionBar?.hide()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -51,11 +67,38 @@ class MainActivity : AppCompatActivity() {
             // Permission has already been granted
         }
 
+        fun buildAlertMessageNoGps() {
+            val builder: android.app.AlertDialog.Builder = android.app.AlertDialog.Builder(this)
+            builder.setMessage("Use GPS")
+                .setCancelable(false)
+                .setPositiveButton("Yes", object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface?, id: Int) {
+                        startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    }
+                })
+                .setNegativeButton("No", object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface, id: Int) {
+                        dialog.cancel()
+                    }
+                })
+            val alert: android.app.AlertDialog? = builder.create()
+            if (alert != null) {
+                alert.show()
+            }
+        }
+
+       fun statusCheck() {
+            val manager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                buildAlertMessageNoGps()
+            }
+        }
 
 
 
         //webview
         webviewsetup()
+        statusCheck()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
