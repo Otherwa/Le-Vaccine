@@ -11,6 +11,8 @@ import android.location.LocationRequest
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Window
+import android.view.WindowManager
 import android.webkit.GeolocationPermissions
 import android.webkit.WebChromeClient
 import android.webkit.WebViewClient
@@ -65,36 +67,8 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             // Permission has already been granted
+            Toast.makeText(applicationContext,"Welcome User",Toast.LENGTH_SHORT).show()
         }
-
-        fun buildAlertMessageNoGps() {
-            val builder: android.app.AlertDialog.Builder = android.app.AlertDialog.Builder(this)
-            builder.setMessage("Use GPS")
-                .setCancelable(false)
-                .setPositiveButton("Yes", object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface?, id: Int) {
-                        startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                    }
-                })
-                .setNegativeButton("No", object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface, id: Int) {
-                        dialog.cancel()
-                    }
-                })
-            val alert: android.app.AlertDialog? = builder.create()
-            if (alert != null) {
-                alert.show()
-            }
-        }
-
-       fun statusCheck() {
-            val manager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                buildAlertMessageNoGps()
-            }
-        }
-
-
 
         //webview
         webviewsetup()
@@ -105,7 +79,7 @@ class MainActivity : AppCompatActivity() {
     private fun webviewsetup(){
         main_view.webViewClient = WebViewClient()
         main_view.apply {
-            loadUrl("https://drug-lord.onrender.com")
+            loadUrl("https://onlyvaccine.onrender.com")
             settings.javaScriptEnabled = true
             settings.safeBrowsingEnabled = true
         }
@@ -119,6 +93,34 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    fun buildAlertMessageNoGps() {
+        val builder: android.app.AlertDialog.Builder = android.app.AlertDialog.Builder(this)
+        builder.setMessage("This App Requires Location Permission Please Allow Location Permission")
+            .setCancelable(false)
+            .setPositiveButton("Yes", object : DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface?, id: Int) {
+                    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+            })
+            .setNegativeButton("No", object : DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface, id: Int) {
+                    dialog.cancel()
+                    this@MainActivity.onBackPressed();
+                }
+            })
+        val alert: android.app.AlertDialog? = builder.create()
+        if (alert != null) {
+            alert.show()
+        }
+    }
+
+    fun statusCheck() {
+        val manager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            buildAlertMessageNoGps()
+        }
     }
 
     override fun onBackPressed() {
